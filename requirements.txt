@@ -1,2 +1,4 @@
-visa
+pyusb
+pyvisa
+pyvisa-py
 -e git://github.com/milescaples/PyRigol.git#egg=rigol
