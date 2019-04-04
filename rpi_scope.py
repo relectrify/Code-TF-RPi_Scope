@@ -85,7 +85,7 @@ class ScopeCapture(QWidget):
         with open(filename+".csv", 'w') as f:
             for point in waveform:
                 f.write(point)
-        self.myBucket.put_object(Key=filename, Body=open(filename, 'rb'))
+        self.myBucket.put_object(Key=filename+'.csv', Body=open(filename+'.csv', 'rb'))
         self.scope.get_screenshot(filename+".png")
 
     def selectionchange(self, i):
