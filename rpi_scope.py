@@ -77,15 +77,17 @@ class ScopeCapture(QWidget):
                 f.write(point)
         try:
             self.myBucket.put_object(Key=filename+'.csv', Body=open(filename+'.csv', 'rb'))
+            logging.info("successfully uploaded "+filename+".csv")
         except:
-            logging.info("something went wrong")
-        logging.info("successfully uploaded "+filename+".csv")
+            logging.info("something went wrong uploading csv")
+        
         self.scope.get_screenshot(filename+".png")
         try:
             self.myBucket.put_object(Key=filename+'.png', Body=open(filename+'.png', 'rb'))
+            logging.info("successfully uploaded "+filename+".png")
         except:
-            logging.info("something went wrong")
-        logging.info("successfully uploaded "+filename+".png")
+            logging.info("something went wrong uploading png")
+        
 
     def createTempFile(self, file_name):
         return ''.join([str(uuid.uuid4().hex[:6]), file_name])
