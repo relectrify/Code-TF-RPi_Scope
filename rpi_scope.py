@@ -6,6 +6,7 @@ import PyQt5
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+import boto3
 
 def raw_data_to_string(raw_data):
     string = str(raw_data).strip("b\'").strip("\\ne")
@@ -32,6 +33,11 @@ class ScopeCapture(QWidget):
         device = rm.open_resource(usb[0])
         device.timeout = None
         self.scope = ds1000z.Ds1000z(device)
+
+        self.s3 = boto3.resource('s3')
+        self.myBucket = self.s3.Bucket('relectrify-tools-oscilloscopedata')
+        for object in self.myBucket.objects.all():
+            print(object)
 
         self.cb = QComboBox()
         self.cb.addItems(["Alice","Bob","Charlie"])
