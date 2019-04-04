@@ -1,0 +1,2 @@
+visa
+-e git://github.com/milescaples/PyRigol.git#egg=rigol
