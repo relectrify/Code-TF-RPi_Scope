@@ -80,13 +80,14 @@ class ScopeCapture(QWidget):
     def on_pb_clicked(self):
         logging.info('writing waveform')
         waveform = raw_data_to_string(self.scope.get_data())
-        filename = "_wfm_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = "_"+str(self.cb.currentText())+"_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = self.createTempFile(filename)
         with open(filename+".csv", 'w') as f:
             for point in waveform:
                 f.write(point)
         self.myBucket.put_object(Key=filename+'.csv', Body=open(filename+'.csv', 'rb'))
         self.scope.get_screenshot(filename+".png")
+        self.myBucket.put_object(Key=filename+'.png', Body=open(filename+'.png', 'rb'))
 
     def selectionchange(self, i):
         print("Current index {}".format(self.cb.itemText(i)))
