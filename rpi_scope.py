@@ -52,7 +52,7 @@ class ScopeCapture(QWidget):
         logTextBox = QPlainTextEditLogger(self)
         logTextBox.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         logging.getLogger().addHandler(logTextBox)
-        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
 
         hbox = QHBoxLayout()
         hbox.addWidget(self.cb)
@@ -79,14 +79,14 @@ class ScopeCapture(QWidget):
 
     def on_pb_clicked(self):
         logging.info('writing waveform')
-        self.scope.get_screenshot("test.png")
         waveform = raw_data_to_string(self.scope.get_data())
-        filename = "wfm" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
+        filename = "_wfm_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = self.createTempFile(filename)
-        with open(filename, 'w') as f:
+        with open(filename+".csv", 'w') as f:
             for point in waveform:
                 f.write(point)
         self.myBucket.put_object(Key=filename, Body=open(filename, 'rb'))
+        self.scope.get_screenshot(filename+".png")
 
     def selectionchange(self, i):
         print("Current index {}".format(self.cb.itemText(i)))
