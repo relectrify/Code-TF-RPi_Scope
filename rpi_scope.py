@@ -7,6 +7,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import boto3
+import time
+import datetime
+import uuid
 
 def raw_data_to_string(raw_data):
     string = str(raw_data).strip("b\'").strip("\\ne")
@@ -78,12 +81,18 @@ class ScopeCapture(QWidget):
         logging.info('writing waveform')
         self.scope.get_screenshot("test.png")
         waveform = raw_data_to_string(self.scope.get_data())
-        with open("waveform.csv", 'w') as f:
+        filename = "wfm" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
+        filename = self.createTempFile(filename)
+        with open(filename, 'w') as f:
             for point in waveform:
                 f.write(point)
+        self.myBucket.put_object(Key=filename, Body=open(filename, 'rb'))
 
     def selectionchange(self, i):
         print("Current index {}".format(self.cb.itemText(i)))
+
+    def createTempFile(self, file_name):
+        return ''.join([str(uuid.uuid4().hex[:6]), file_name])
 
 def main():
     app = QApplication([])
