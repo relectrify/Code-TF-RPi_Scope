@@ -39,12 +39,9 @@ class ScopeCapture(QWidget):
 
         self.s3 = boto3.resource('s3')
         self.myBucket = self.s3.Bucket('relectrify-tools-oscilloscopedata')
-        for object in self.myBucket.objects.all():
-            print(object)
 
         self.cb = QComboBox()
         self.cb.addItems(["Alice","Bob","Charlie"])
-        self.cb.currentIndexChanged.connect(self.selectionchange)
 
         self.pb = QPushButton('Capture')
         self.pb.clicked.connect(self.on_pb_clicked)
@@ -71,26 +68,24 @@ class ScopeCapture(QWidget):
         qtRect.moveCenter(centerPoint)
         self.move(qtRect.topLeft())
 
-    def test(self):
-        logging.debug('damn, a bug')
-        logging.info('something to remember')
-        logging.warning('that\'s not right')
-        logging.error('foobar')
-
     def on_pb_clicked(self):
-        logging.info('writing waveform')
         waveform = raw_data_to_string(self.scope.get_data())
         filename = "_"+str(self.cb.currentText())+"_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = self.createTempFile(filename)
         with open(filename+".csv", 'w') as f:
             for point in waveform:
                 f.write(point)
-        self.myBucket.put_object(Key=filename+'.csv', Body=open(filename+'.csv', 'rb'))
+        try:
+            self.myBucket.put_object(Key=filename+'.csv', Body=open(filename+'.csv', 'rb'))
+        except:
+            logging.info("something went wrong")
+        logging.info("successfully uploaded "+filename+".csv")
         self.scope.get_screenshot(filename+".png")
-        self.myBucket.put_object(Key=filename+'.png', Body=open(filename+'.png', 'rb'))
-
-    def selectionchange(self, i):
-        print("Current index {}".format(self.cb.itemText(i)))
+        try:
+            self.myBucket.put_object(Key=filename+'.png', Body=open(filename+'.png', 'rb'))
+        except:
+            logging.info("something went wrong")
+        logging.info("successfully uploaded "+filename+".png")
 
     def createTempFile(self, file_name):
         return ''.join([str(uuid.uuid4().hex[:6]), file_name])
