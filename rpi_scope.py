@@ -1,6 +1,8 @@
 import visa
+import sys
 from rigol import ds1000z
 import logging
+import PyQt5
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -10,11 +12,22 @@ def raw_data_to_string(raw_data):
     string = string.replace(',', '\n')
     return string
 
+class QPlainTextEditLogger(logging.Handler):
+    def __init__(self, parent):
+        super().__init__()
+        self.widget = QPlainTextEdit(parent)
+        self.widget.setReadOnly(True)
+    
+    def emit(self, record):
+        msg = self.format(record)
+        self.widget.appendPlainText(msg)
+
 class ScopeCapture(QWidget):
     def __init__(self, parent = None):
         super(ScopeCapture, self).__init__(parent)
         
-        resources = visa.ResourceManager('@py').list_resources()
+        rm = visa.ResourceManager('@py')
+        resources = rm.list_resources()
         usb = list(filter(lambda x: 'USB' in x, resources))
         device = rm.open_resource(usb[0])
         device.timeout = None
@@ -56,6 +69,7 @@ class ScopeCapture(QWidget):
         logging.error('foobar')
 
     def on_pb_clicked(self):
+        logging.info('writing waveform')
         self.scope.get_screenshot("test.png")
         waveform = raw_data_to_string(self.scope.get_data())
         with open("waveform.csv", 'w') as f:
@@ -67,7 +81,7 @@ class ScopeCapture(QWidget):
 
 def main():
     app = QApplication([])
-    ex = scopeCapture()
+    ex = ScopeCapture()
     ex.show()
     sys.exit(app.exec_())
 
